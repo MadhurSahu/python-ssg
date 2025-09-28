@@ -1,10 +1,10 @@
 import unittest
 
-from src.split_nodes_delimiter import split_nodes_delimiter
+from src.markdown_parser import split_nodes_delimiter, extract_markdown_images
 from src.textnode import TextNode, TextType
 
 
-class TestSplitNodesDelimiter(unittest.TestCase):
+class TestMarkdownParser(unittest.TestCase):
     def test_bold(self):
         node = TextNode("This is text with a **bolded phrase** in the middle", TextType.Text)
         expected = [
@@ -36,6 +36,22 @@ class TestSplitNodesDelimiter(unittest.TestCase):
             delimiter="**",
             text_type=TextType.Bold,
         )
+
+    def test_extract_markdown_links(self):
+        matches = extract_markdown_images(
+            "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
+        )
+        expected = [
+            ("rick roll", "https://i.imgur.com/aKaOqIh.gif"),
+            ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg")
+        ]
+        self.assertListEqual(expected, matches)
+
+    def test_extract_markdown_images(self):
+        matches = extract_markdown_images(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
 
 
 if __name__ == '__main__':
