@@ -1,7 +1,7 @@
 import unittest
 
 from src.markdown_parser import split_nodes_delimiter, extract_markdown_images, split_nodes_image, split_nodes_link, \
-    text_to_textnodes
+    text_to_textnodes, markdown_to_blocks
 from src.textnode import TextNode, TextType
 
 
@@ -78,7 +78,7 @@ class TestMarkdownParser(unittest.TestCase):
         actual = split_nodes_link([node])
         self.assertEqual(expected, actual)
 
-    def test_complete(self):
+    def test_inline_complete(self):
         text = "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
         expected = [
             TextNode("This is ", TextType.Text),
@@ -93,6 +93,24 @@ class TestMarkdownParser(unittest.TestCase):
             TextNode("link", TextType.Link, "https://boot.dev"),
         ]
         actual = text_to_textnodes(text)
+        self.assertEqual(expected, actual)
+
+    def test_blocks(self):
+        md = """
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+"""
+        expected = [
+            "This is **bolded** paragraph",
+            "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+            "- This is a list\n- with items",
+        ]
+        actual = markdown_to_blocks(md)
         self.assertEqual(expected, actual)
 
 

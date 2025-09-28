@@ -8,6 +8,20 @@ REGEX_LINK = r"(?<!!)\[([^\[\]]*)]\(([^()]*)\)"
 REGEX_LINK_CAPTURE = r"(?<!!)(\[[^\[\]]*]\([^()]*\))"
 
 
+def markdown_to_blocks(markdown):
+    return list(
+        filter(
+            lambda block: block != "",
+            list(
+                map(
+                    lambda block: block.strip(),
+                    markdown.split("\n\n")
+                )
+            )
+        )
+    )
+
+
 def text_to_textnodes(text):
     node = TextNode(text, TextType.Text)
     nodes = split_nodes_delimiter([node], "**", TextType.Bold)
