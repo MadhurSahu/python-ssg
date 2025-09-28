@@ -1,11 +1,24 @@
 import re
 
+from src.blocktype import block_to_block_type, BlockType
+from src.leafnode import LeafNode
+from src.parentnode import ParentNode
 from src.textnode import TextType, TextNode
 
 REGEX_IMAGE = r"!\[([^\[\]]*)]\(([^()]*)\)"
 REGEX_IMAGE_CAPTURE = r"(!\[[^\[\]]*]\([^()]*\))"
 REGEX_LINK = r"(?<!!)\[([^\[\]]*)]\(([^()]*)\)"
 REGEX_LINK_CAPTURE = r"(?<!!)(\[[^\[\]]*]\([^()]*\))"
+
+
+def markdown_to_html_node(markdown):
+    children = []
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        block_node = block_to_html_node(block, block_type)
+        children.append(block_node)
+    return ParentNode("div", children)
 
 
 def markdown_to_blocks(markdown):
@@ -18,6 +31,50 @@ def markdown_to_blocks(markdown):
                     markdown.split("\n\n")
                 )
             )
+        )
+    )
+
+
+def block_to_html_node(block, block_type):
+    if block_type == BlockType.Paragraph:
+        return ParentNode("p", text_to_leaf_nodes(block.replace("\n", " ")))
+    if block_type == BlockType.Heading:
+        texts = re.split(r"^(#{1,6}) (.*)", block)
+        return ParentNode(f"h{len(texts[0])}", text_to_leaf_nodes(texts[1]))
+    if block_type == BlockType.Code:
+        texts = re.findall(r"^```([\s\S]+)```$", block)
+        code_block = LeafNode("code", texts[0].lstrip())
+        return ParentNode("pre", [code_block])
+
+    children = []
+    for line in block.split("\n"):
+        if block_type == BlockType.Quote:
+            texts = re.findall(r"^>(.*)", line)
+            children.extend(text_to_leaf_nodes(texts[0]))
+            continue
+        if block_type == BlockType.UnorderedList:
+            texts = re.findall(r"^- (.*)", line)
+            children.append(ParentNode("li", text_to_leaf_nodes(texts[0])))
+            continue
+        if block_type == BlockType.OrderedList:
+            texts = re.findall(r"^\. (.*)", line)
+            children.append(ParentNode("li", text_to_leaf_nodes(texts[0])))
+
+    if block_type == BlockType.Quote:
+        return ParentNode("blockquote", children)
+    if block_type == BlockType.UnorderedList:
+        return ParentNode("ul", children)
+    if block_type == BlockType.OrderedList:
+        return ParentNode("ol", children)
+
+    raise ValueError(f"Unknown block type: {block_type}")
+
+
+def text_to_leaf_nodes(text):
+    return list(
+        map(
+            lambda text_node: text_node.to_html(),
+            text_to_textnodes(text)
         )
     )
 
