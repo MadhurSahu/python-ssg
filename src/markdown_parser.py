@@ -56,8 +56,8 @@ def block_to_html_node(block, block_type):
     children = []
     for line in block.split("\n"):
         if block_type == BlockType.Quote:
-            texts = re.findall(r"^>(.*)", line)
-            children.extend(text_to_leaf_nodes(texts[0]))
+            texts = re.findall(r"^> (.+)", line)
+            children.extend(text_to_leaf_nodes(texts[0] if len(texts) > 0 else ""))
             continue
         if block_type == BlockType.UnorderedList:
             texts = re.findall(r"^- (.*)", line)

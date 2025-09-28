@@ -9,7 +9,7 @@ class HTMLNode:
         raise NotImplementedError()
 
     def props_to_html(self):
-        if not self.props:
+        if self.props is None:
             return ""
 
         html = ""
