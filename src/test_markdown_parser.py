@@ -1,7 +1,7 @@
 import unittest
 
 from src.markdown_parser import split_nodes_delimiter, extract_markdown_images, split_nodes_image, split_nodes_link, \
-    text_to_textnodes, markdown_to_blocks, markdown_to_html_node
+    text_to_textnodes, markdown_to_blocks, markdown_to_html_node, extract_title
 from src.textnode import TextNode, TextType
 
 
@@ -143,6 +143,10 @@ the **same** even with inline stuff
             "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
         )
 
+    def test_title(self):
+        md = "# hi"
+        actual = extract_title(md)
+        self.assertEqual(actual, "hi")
 
 if __name__ == '__main__':
     unittest.main()

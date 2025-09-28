@@ -28,7 +28,7 @@ def block_to_block_type(block):
             is_quote = False
         if is_unordered_list and not re.match(r"^- ", line):
             is_unordered_list = False
-        if is_ordered_list and not re.match(r"^\. ", line):
+        if is_ordered_list and not re.match(r"^\d+\. ", line):
             is_ordered_list = False
 
     if is_quote:

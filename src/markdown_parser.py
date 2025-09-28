@@ -11,6 +11,13 @@ REGEX_LINK = r"(?<!!)\[([^\[\]]*)]\(([^()]*)\)"
 REGEX_LINK_CAPTURE = r"(?<!!)(\[[^\[\]]*]\([^()]*\))"
 
 
+def extract_title(markdown):
+    title = re.findall(r"# (.*)", markdown.split("\n")[0])
+    if not title:
+        raise Exception("Title not found")
+    return title[0].strip()
+
+
 def markdown_to_html_node(markdown):
     children = []
     blocks = markdown_to_blocks(markdown)
@@ -39,7 +46,7 @@ def block_to_html_node(block, block_type):
     if block_type == BlockType.Paragraph:
         return ParentNode("p", text_to_leaf_nodes(block.replace("\n", " ")))
     if block_type == BlockType.Heading:
-        texts = re.split(r"^(#{1,6}) (.*)", block)
+        texts = re.findall(r"^(#{1,6}) (.*)", block.strip())[0]
         return ParentNode(f"h{len(texts[0])}", text_to_leaf_nodes(texts[1]))
     if block_type == BlockType.Code:
         texts = re.findall(r"^```([\s\S]+)```$", block)
@@ -57,7 +64,7 @@ def block_to_html_node(block, block_type):
             children.append(ParentNode("li", text_to_leaf_nodes(texts[0])))
             continue
         if block_type == BlockType.OrderedList:
-            texts = re.findall(r"^\. (.*)", line)
+            texts = re.findall(r"^\d+\. (.*)", line)
             children.append(ParentNode("li", text_to_leaf_nodes(texts[0])))
 
     if block_type == BlockType.Quote:
