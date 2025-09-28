@@ -1,13 +1,12 @@
 import os
 import shutil
 
-from src.generate_page import generate_page
+from src.generate_page import generate_pages_recursive
 
 
 def main():
     copy_static_data()
-    generate_page("content/index.md", "template.html", "public/index.html")
-
+    generate_pages_recursive("content", "template.html", "public")
 
 def copy_static_data():
     if not os.path.exists("static"):
